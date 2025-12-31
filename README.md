@@ -6,131 +6,133 @@ This architecture implements an event-driven, serverless file-processing pipelin
 
 This design starts as a POC and scales cleanly into production / enterprise without changing the core pattern.
 
-⸻
+---
 
 ## Objectives
+
 - Automatically unzip files uploaded to Blob Storage
 - Event-driven execution (no polling)
 - Clear success / failure paths
 - Built-in observability and alerting
 - Secure, secretless authentication (Managed Identity)
 
-⸻
+---
 
-### Storage Layer
+## Storage Layer
 
-Azure Blob Storage Account
+### Azure Blob Storage Account
 
-Containers:
-	- landing/
-Input container. New ZIP / 7Z files are uploaded here.
-	- rocessed/
-Destination for extracted files.
-	- archive/
-Stores original compressed files after successful processing.
-	- failed/
-Dead-letter container for files that failed processing.
+**Containers:**
+- **`landing/`** - Input container. New ZIP / 7Z files are uploaded here.
+- **`processed/`** - Destination for extracted files.
+- **`archive/`** - Stores original compressed files after successful processing.
+- **`failed/`** - Dead-letter container for files that failed processing.
 
 This layout provides a clear file lifecycle and simplifies auditing, troubleshooting, and reprocessing.
 
-⸻
+---
 
-### Eventing Layer
+## Eventing Layer
 
-Azure Event Grid (System Topic)
-	•	Source: Azure Storage Account
-	•	Event Type: Microsoft.Storage.BlobCreated
-	•	Subject Filter:
+### Azure Event Grid (System Topic)
 
-/blobServices/default/containers/landing/
-
-
+- **Source**: Azure Storage Account
+- **Event Type**: `Microsoft.Storage.BlobCreated`
+- **Subject Filter**: `/blobServices/default/containers/landing/`
 
 Event Grid emits an event whenever a new blob is created in the landing container.
 
-⸻
+---
 
-### Compute Layer
+## Compute Layer
 
-Azure Container Apps Job
-	•	Trigger Type: Event
-	•	Trigger Source: Event Grid
-	•	Execution Model: One job execution per blob
-	•	Retry Limit: 1
-	•	Timeout: 30 minutes
-	•	Scaling: Event-driven (blob-based)
+### Azure Container Apps Job
+
+- **Trigger Type**: Event
+- **Trigger Source**: Event Grid
+- **Execution Model**: One job execution per blob
+- **Retry Limit**: 1
+- **Timeout**: 30 minutes
+- **Scaling**: Event-driven (blob-based)
 
 The job runs only when a new file arrives, making it cost-efficient and highly scalable.
 
-⸻
+---
 
-### Runtime Logic (Container)
+## Runtime Logic (Container)
 
-Unzipper Container Responsibilities
-	1.	Receive blob metadata (blob name)
-	2.	Download the archive from landing/
-	3.	Detect archive type (ZIP / 7Z)
-	4.	Extract contents
-	5.	Upload extracted files to processed/
-	6.	Move original archive:
-	•	Success → archive/
-	•	Failure → failed/
-	7.	Emit structured logs
+### Unzipper Container Responsibilities
 
-Design Principles
-	•	Fail fast
-	•	Idempotent uploads
-	•	Explicit success and failure paths
-	•	Clear, searchable logs
+1. Receive blob metadata (blob name)
+2. Download the archive from `landing/`
+3. Detect archive type (ZIP / 7Z)
+4. Extract contents
+5. Upload extracted files to `processed/`
+6. Move original archive:
+   - **Success** → `archive/`
+   - **Failure** → `failed/`
+7. Emit structured logs
 
-⸻
+### Design Principles
 
-### Identity & Security
+- Fail fast
+- Idempotent uploads
+- Explicit success and failure paths
+- Clear, searchable logs
 
-Managed Identity (Recommended)
-	•	Type: System-assigned Managed Identity on the Container App Job
-	•	RBAC Role: Storage Blob Data Contributor
-	•	Scope: Storage Account
+---
 
-Benefits:
-	•	No secrets or credentials
-	•	Automatic key rotation
-	•	Auditable access
-	•	Enterprise security standard
+## Identity & Security
 
-⸻
+### Managed Identity (Recommended)
 
-### Observability Layer
+- **Type**: System-assigned Managed Identity on the Container App Job
+- **RBAC Role**: Storage Blob Data Contributor
+- **Scope**: Storage Account
 
-Azure Monitor & Log Analytics
+**Benefits:**
+- No secrets or credentials
+- Automatic key rotation
+- Auditable access
+- Enterprise security standard
 
-Collected telemetry:
-	•	Job execution status (Succeeded / Failed)
-	•	Execution duration
-	•	Blob name
-	•	Error messages
+---
 
-Log source:
-	•	ContainerAppConsoleLogs
+## Observability Layer
 
-⸻
+### Azure Monitor & Log Analytics
 
-Alerting Strategy
+**Collected telemetry:**
+- Job execution status (Succeeded / Failed)
+- Execution duration
+- Blob name
+- Error messages
 
-Phase 1 (Immediate)
-	•	Metric Alert:
-	•	Failed job executions > 0
-	•	Notifications:
-	•	Email
-	•	Microsoft Teams webhook
+**Log source:**
+- ContainerAppConsoleLogs
 
-Phase 2 (Enhanced Reliability)
-	•	Alert on blobs present in failed/ container
-	•	Log Analytics alert for error patterns in logs
+---
 
-⸻
+## Alerting Strategy
 
-### End-to-End Flow
+### Phase 1 (Immediate)
+
+**Metric Alert:**
+- Failed job executions > 0
+
+**Notifications:**
+- Email
+- Microsoft Teams webhook
+
+### Phase 2 (Enhanced Reliability)
+
+- Alert on blobs present in `failed/` container
+- Log Analytics alert for error patterns in logs
+
+---
+
+## End-to-End Flow
+
 ```
 File Uploaded
      ↓
@@ -152,27 +154,41 @@ Unzipper Container
 Azure Monitor & Alerts
 ```
 
+---
 
-⸻
+## Why This Architecture Works
 
-Future Enhancements (Optional)
-	•	Virus scanning (Defender for Storage)
-	•	Schema or checksum validation
-	•	Concurrency limits
-	•	Reprocessing workflow (failed → landing)
-	•	Customer-managed encryption keys (CMK)
-	•	SLA dashboards
+- **Event-driven and serverless**
+- **No infrastructure to manage**
+- **Scales automatically**
+- **Cost-efficient** (pay per execution)
+- **Secure by default**
+- **Auditable and observable**
+- **Easy to automate** with Terraform
 
-⸻
+This is a Microsoft-recommended pattern for batch file processing pipelines.
 
-### Summary
+---
+
+## Future Enhancements (Optional)
+
+- Virus scanning (Defender for Storage)
+- Schema or checksum validation
+- Concurrency limits
+- Reprocessing workflow (`failed/` → `landing/`)
+- Customer-managed encryption keys (CMK)
+- SLA dashboards
+
+---
+
+## Summary
 
 This architecture provides a clean, production-ready foundation for file-based batch processing on Azure while remaining simple enough for a POC.
 
 It balances:
-	•	Reliability
-	•	Security
-	•	Cost
-	•	Operational clarity
+- **Reliability**
+- **Security**
+- **Cost**
+- **Operational clarity**
 
 and can evolve without re-architecture.
