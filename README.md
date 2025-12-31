@@ -22,13 +22,13 @@ This design starts as a POC and scales cleanly into production / enterprise with
 Azure Blob Storage Account
 
 Containers:
-	•	landing/
+	- landing/
 Input container. New ZIP / 7Z files are uploaded here.
-	•	processed/
+	- rocessed/
 Destination for extracted files.
-	•	archive/
+	- archive/
 Stores original compressed files after successful processing.
-	•	failed/
+	- failed/
 Dead-letter container for files that failed processing.
 
 This layout provides a clear file lifecycle and simplifies auditing, troubleshooting, and reprocessing.
