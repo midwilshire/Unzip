@@ -17,7 +17,7 @@ This design starts as a POC and scales cleanly into production / enterprise with
 
 ⸻
 
-Storage Layer
+### Storage Layer
 
 Azure Blob Storage Account
 
@@ -35,7 +35,7 @@ This layout provides a clear file lifecycle and simplifies auditing, troubleshoo
 
 ⸻
 
-Eventing Layer
+### Eventing Layer
 
 Azure Event Grid (System Topic)
 	•	Source: Azure Storage Account
@@ -50,7 +50,7 @@ Event Grid emits an event whenever a new blob is created in the landing containe
 
 ⸻
 
-Compute Layer
+### Compute Layer
 
 Azure Container Apps Job
 	•	Trigger Type: Event
@@ -64,7 +64,7 @@ The job runs only when a new file arrives, making it cost-efficient and highly s
 
 ⸻
 
-Runtime Logic (Container)
+### Runtime Logic (Container)
 
 Unzipper Container Responsibilities
 	1.	Receive blob metadata (blob name)
@@ -85,7 +85,7 @@ Design Principles
 
 ⸻
 
-Identity & Security
+### Identity & Security
 
 Managed Identity (Recommended)
 	•	Type: System-assigned Managed Identity on the Container App Job
@@ -100,7 +100,7 @@ Benefits:
 
 ⸻
 
-Observability Layer
+### Observability Layer
 
 Azure Monitor & Log Analytics
 
@@ -130,7 +130,7 @@ Phase 2 (Enhanced Reliability)
 
 ⸻
 
-End-to-End Flow
+### End-to-End Flow
 ```
 File Uploaded
      ↓
@@ -165,7 +165,7 @@ Future Enhancements (Optional)
 
 ⸻
 
-Summary
+### Summary
 
 This architecture provides a clean, production-ready foundation for file-based batch processing on Azure while remaining simple enough for a POC.
 
