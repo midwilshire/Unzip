@@ -1,6 +1,6 @@
-Event-driven Unzip Pipeline Architecture
+# Event-driven Unzip Pipeline Architecture
 
-Overview
+## Overview
 
 This architecture implements an event-driven, serverless file-processing pipeline on Azure. When a compressed file (ZIP / 7Z) is uploaded to Azure Blob Storage, it is automatically processed by an Azure Container Apps Job, extracted, and routed to the appropriate storage containers with full observability and alerting.
 
@@ -8,12 +8,12 @@ This design starts as a POC and scales cleanly into production / enterprise with
 
 ⸻
 
-Objectives
-	•	Automatically unzip files uploaded to Blob Storage
-	•	Event-driven execution (no polling)
-	•	Clear success / failure paths
-	•	Built-in observability and alerting
-	•	Secure, secretless authentication (Managed Identity)
+## Objectives
+- Automatically unzip files uploaded to Blob Storage
+- Event-driven execution (no polling)
+- Clear success / failure paths
+- Built-in observability and alerting
+- Secure, secretless authentication (Managed Identity)
 
 ⸻
 
