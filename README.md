@@ -131,7 +131,7 @@ Phase 2 (Enhanced Reliability)
 ⸻
 
 End-to-End Flow
-
+```
 File Uploaded
      ↓
 Azure Blob Storage (landing)
@@ -150,7 +150,7 @@ Unzipper Container
 └───────────────┴───────────────┘
      ↓
 Azure Monitor & Alerts
-
+```
 
 
 ⸻
