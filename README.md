@@ -166,8 +166,6 @@ Azure Monitor & Alerts
 - **Auditable and observable**
 - **Easy to automate** with Terraform
 
-This is a Microsoft-recommended pattern for batch file processing pipelines.
-
 ---
 
 ## Future Enhancements (Optional)
